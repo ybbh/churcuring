@@ -1,0 +1,14 @@
+@startuml
+start
+:Initialize System;
+if (CheckConfiguration?) then (yes)
+  :Load Configuration;
+else (no)
+  :Use Default Settings;
+end if
+:Process Data;
+while (HasMoreData?) is (yes)
+  :Process Next Item;
+end while (no)
+stop
+@enduml

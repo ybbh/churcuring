@@ -1,0 +1,24 @@
+type Flag {
+  ok: bool;
+}
+
+context SimpleCtx {
+  value: int;
+}
+
+state Start uses SimpleCtx {
+  let f: Flag = { ok: SimpleCtx.value > 0 };
+
+  next {
+    when SimpleCtx.value > 0 => End;
+    otherwise => End;
+  }
+}
+
+state End uses SimpleCtx {
+  commit;
+
+  next {
+    otherwise => End;
+  }
+}

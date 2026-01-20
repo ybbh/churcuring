@@ -1,0 +1,29 @@
+context NumCtx {
+  x: int;
+}
+
+state Decide uses NumCtx {
+  next {
+    when NumCtx.x > 10 => Big;
+    when NumCtx.x > 0  => Small;
+    otherwise => Zero;
+  }
+}
+
+state Big uses NumCtx {
+  next {
+    otherwise => Big;
+  }
+}
+
+state Small uses NumCtx {
+  next {
+    otherwise => Small;
+  }
+}
+
+state Zero uses NumCtx {
+  next {
+    otherwise => Zero;
+  }
+}

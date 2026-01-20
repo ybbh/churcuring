@@ -1,0 +1,26 @@
+context UserCtx {
+  uid: UserId;
+}
+
+state LoadUser uses UserCtx {
+  select u: User
+    from User
+    where u.id = UserCtx.uid
+    limit 1;
+
+  next {
+    otherwise => UpdateUser;
+  }
+}
+
+state UpdateUser uses UserCtx {
+  update User
+    set last_login = 123456
+    where id = UserCtx.uid;
+
+  commit;
+
+  next {
+    otherwise => UpdateUser;
+  }
+}

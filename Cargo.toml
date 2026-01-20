@@ -1,0 +1,20 @@
+[workspace]
+resolver = "1"
+
+
+members = [
+    "tree-sitter-scl",
+    "tree-sitter-ad",
+    "ad2fsm",
+    "scl2fsm",
+    "common"
+]
+
+[workspace.dependencies]
+tree-sitter-ad = { path = "tree-sitter-ad" }
+common = { path = "common" }
+tree-sitter = { version = "0.26.3" }
+md-5 = { version = "0.11.0-rc.0" }
+serde_json = { version = "1.0.149" }
+tree-sitter-language = { version = "0.1.6" }
+cc = { version = "1.2.52" }

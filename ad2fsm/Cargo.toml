@@ -1,0 +1,25 @@
+[package]
+name = "ad2fsm"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+common = { workspace = true }
+tree-sitter-ad = { workspace = true }
+anyhow = "1.0.100"
+clap = { version = "4.5.54" }
+askama = { version = "0.15.1" }
+tracing = { version = "0.1.44" }
+serde = { version = "1.0.228", features = ["derive"] }
+tree-sitter = { workspace = true }
+lexpr = "0.2.7"
+regex = "1.12.2"
+[build-dependencies]
+md-5 = { workspace = true }
+tree-sitter-ad = { workspace = true }
+tree-sitter = { workspace = true }
+serde_json = { workspace = true }
+base16ct = "1.0.0"
+anyhow = "1.0.100"
+cargo_metadata = "0.23.1"
+

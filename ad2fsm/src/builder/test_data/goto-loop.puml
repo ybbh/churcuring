@@ -1,0 +1,6 @@
+@startuml
+start
+label LOOP
+:A;
+goto LOOP;
+@enduml

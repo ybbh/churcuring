@@ -1,0 +1,11 @@
+// Auto-generated FSM state definitions
+
+namespace GeneratedFSM
+{
+    public enum State
+    {
+    {% for name in states %}
+        {{ name }}{% if !loop.last %},{% endif %}
+    {% endfor %}
+    }
+}

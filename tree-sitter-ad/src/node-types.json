@@ -1,0 +1,1132 @@
+[
+  {
+    "type": "action_statement",
+    "named": true,
+    "fields": {
+      "action": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "text_content",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "arrow",
+    "named": true,
+    "fields": {
+      "arrow": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "arrow_style",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "arrow_properties",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "arrow_property_element",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "arrow_property_element",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "color_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "arrow_style",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "arrow_properties",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "block_statement_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "group_statement",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "repeat_statement",
+          "named": true
+        },
+        {
+          "type": "switch_statement",
+          "named": true
+        },
+        {
+          "type": "terminal_statement",
+          "named": true
+        },
+        {
+          "type": "while_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "case_clause",
+    "named": true,
+    "fields": {
+      "block_statement_list": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block_statement_list",
+            "named": true
+          }
+        ]
+      },
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "color_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "color_value_item",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "color_value_item",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "define_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "pragma",
+          "named": true
+        },
+        {
+          "type": "skinparam",
+          "named": true
+        },
+        {
+          "type": "style_block",
+          "named": true
+        },
+        {
+          "type": "title_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "document",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "define_statement",
+          "named": true
+        },
+        {
+          "type": "enduml_directive",
+          "named": true
+        },
+        {
+          "type": "group_statement",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "repeat_statement",
+          "named": true
+        },
+        {
+          "type": "startuml_directive",
+          "named": true
+        },
+        {
+          "type": "switch_statement",
+          "named": true
+        },
+        {
+          "type": "terminal_statement",
+          "named": true
+        },
+        {
+          "type": "while_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "else_condition",
+    "named": true,
+    "fields": {
+      "block_statement_list": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block_statement_list",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "text_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "elseif_condition",
+    "named": true,
+    "fields": {
+      "block_statement_list": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block_statement_list",
+            "named": true
+          }
+        ]
+      },
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "text_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "endif_directive",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "endswitch_directive",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "endwhile_directive",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "expression",
+    "named": true,
+    "fields": {
+      "activity_identifier": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "expression_content": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "text_content",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "goto_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "group_statement",
+    "named": true,
+    "fields": {
+      "block_statement_list": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block_statement_list",
+            "named": true
+          }
+        ]
+      },
+      "color": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "color_value",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "text_content",
+            "named": true
+          }
+        ]
+      },
+      "type": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "group_type",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "group_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "if_condition",
+    "named": true,
+    "fields": {
+      "block_statement_list": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block_statement_list",
+            "named": true
+          }
+        ]
+      },
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "text_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "if_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "else_condition",
+          "named": true
+        },
+        {
+          "type": "elseif_condition",
+          "named": true
+        },
+        {
+          "type": "endif_directive",
+          "named": true
+        },
+        {
+          "type": "if_condition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "note_statement",
+    "named": true,
+    "fields": {
+      "content": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "text_content",
+            "named": true
+          }
+        ]
+      },
+      "position": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "bottom",
+            "named": false
+          },
+          {
+            "type": "left",
+            "named": false
+          },
+          {
+            "type": "right",
+            "named": false
+          },
+          {
+            "type": "top",
+            "named": false
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "pragma",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "operator": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "=",
+            "named": false
+          },
+          {
+            "type": "off",
+            "named": false
+          },
+          {
+            "type": "on",
+            "named": false
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "text_content",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "repeat_statement",
+    "named": true,
+    "fields": {
+      "block_statement_list": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block_statement_list",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "repeat_statement_end",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "repeat_statement_end",
+    "named": true,
+    "fields": {
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "skinparam",
+    "named": true,
+    "fields": {
+      "element": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "property": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "skinparam_value",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "skinparam_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "color_value",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "text_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "startuml_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "text_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "stop",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "style_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "style_rule",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "style_property",
+    "named": true,
+    "fields": {
+      "property": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "text_content",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "style_rule",
+    "named": true,
+    "fields": {
+      "selector": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "style_property",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "switch_statement",
+    "named": true,
+    "fields": {
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "case_clause",
+          "named": true
+        },
+        {
+          "type": "endswitch_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "terminal_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_statement",
+          "named": true
+        },
+        {
+          "type": "arrow",
+          "named": true
+        },
+        {
+          "type": "break_statement",
+          "named": true
+        },
+        {
+          "type": "goto_statement",
+          "named": true
+        },
+        {
+          "type": "note_statement",
+          "named": true
+        },
+        {
+          "type": "stop",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "text_content",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "text_word",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "text_word",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "title_statement",
+    "named": true,
+    "fields": {
+      "text": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "text_content",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "while_statement",
+    "named": true,
+    "fields": {
+      "block_statement_list": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "block_statement_list",
+            "named": true
+          }
+        ]
+      },
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "endwhile_directive",
+          "named": true
+        },
+        {
+          "type": "text_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "!pragma",
+    "named": false
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": ",",
+    "named": false
+  },
+  {
+    "type": "-",
+    "named": false
+  },
+  {
+    "type": "-->",
+    "named": false
+  },
+  {
+    "type": "->",
+    "named": false
+  },
+  {
+    "type": "/",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": ";",
+    "named": false
+  },
+  {
+    "type": "</style>",
+    "named": false
+  },
+  {
+    "type": "<style>",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": "@startuml",
+    "named": false
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "\\",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "activity",
+    "named": false
+  },
+  {
+    "type": "bold",
+    "named": false
+  },
+  {
+    "type": "bottom",
+    "named": false
+  },
+  {
+    "type": "break_statement",
+    "named": true
+  },
+  {
+    "type": "card",
+    "named": false
+  },
+  {
+    "type": "case",
+    "named": false
+  },
+  {
+    "type": "dashed",
+    "named": false
+  },
+  {
+    "type": "dotted",
+    "named": false
+  },
+  {
+    "type": "else",
+    "named": false
+  },
+  {
+    "type": "elseif",
+    "named": false
+  },
+  {
+    "type": "end",
+    "named": false
+  },
+  {
+    "type": "endif",
+    "named": false
+  },
+  {
+    "type": "endnote",
+    "named": false
+  },
+  {
+    "type": "endswitch",
+    "named": false
+  },
+  {
+    "type": "enduml_directive",
+    "named": true
+  },
+  {
+    "type": "endwhile",
+    "named": false
+  },
+  {
+    "type": "floating",
+    "named": false
+  },
+  {
+    "type": "goto",
+    "named": false
+  },
+  {
+    "type": "group",
+    "named": false
+  },
+  {
+    "type": "hidden",
+    "named": false
+  },
+  {
+    "type": "identifier",
+    "named": true
+  },
+  {
+    "type": "if",
+    "named": false
+  },
+  {
+    "type": "is",
+    "named": false
+  },
+  {
+    "type": "label",
+    "named": false
+  },
+  {
+    "type": "left",
+    "named": false
+  },
+  {
+    "type": "note",
+    "named": false
+  },
+  {
+    "type": "off",
+    "named": false
+  },
+  {
+    "type": "on",
+    "named": false
+  },
+  {
+    "type": "package",
+    "named": false
+  },
+  {
+    "type": "partition",
+    "named": false
+  },
+  {
+    "type": "rectangle",
+    "named": false
+  },
+  {
+    "type": "repeat",
+    "named": false
+  },
+  {
+    "type": "repeatwhile",
+    "named": false
+  },
+  {
+    "type": "right",
+    "named": false
+  },
+  {
+    "type": "skinparam",
+    "named": false
+  },
+  {
+    "type": "start",
+    "named": false
+  },
+  {
+    "type": "stop",
+    "named": false
+  },
+  {
+    "type": "switch",
+    "named": false
+  },
+  {
+    "type": "then",
+    "named": false
+  },
+  {
+    "type": "title",
+    "named": false
+  },
+  {
+    "type": "top",
+    "named": false
+  },
+  {
+    "type": "while",
+    "named": false
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  }
+]

@@ -1,0 +1,8 @@
+@startuml
+start
+repeat
+  :A;
+repeat while (x < 5)
+:B;
+stop
+@enduml

@@ -1,0 +1,43 @@
+// Auto-generated FSM Dispatcher
+
+namespace GeneratedFSM
+{
+    public class Dispatcher
+    {
+        public State CurrentState { get; private set; }
+        private readonly Context _ctx;
+
+        public Dispatcher(State start, Context ctx)
+        {
+            CurrentState = start;
+            _ctx = ctx;
+        }
+
+        public void Step(string transition)
+        {
+            CurrentState = CurrentState switch
+            {
+            {% for s in states %}
+                State.{{ s }} => DispatchFrom{{ s }}(transition),
+            {% endfor %}
+                _ => CurrentState
+            };
+        }
+
+    {% for s in states %}
+        private State DispatchFrom{{ s }}(string t)
+        {
+        {% for cls in dispatch_map[s] %}
+            if (t == "{{ cls }}") {
+                if ({{ cls }}.CheckCondition != null
+                     && {{ cls }}.CheckCondition(_ctx)
+                ) {
+                    return {{ cls }}.Execute(_ctx);
+                }
+            }
+        {% endfor %}
+            return CurrentState;
+        }
+    {% endfor %}
+    }
+}

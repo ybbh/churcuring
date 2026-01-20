@@ -1,0 +1,9 @@
+@startuml
+start
+:A;
+goto L1;
+:B;
+label L1
+:C;
+stop
+@enduml

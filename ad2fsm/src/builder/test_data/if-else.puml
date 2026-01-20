@@ -1,0 +1,10 @@
+@startuml
+start
+if (x > 0)
+  :A;
+else
+  :B;
+endif
+:C;
+stop
+@enduml

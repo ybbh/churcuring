@@ -1,0 +1,9 @@
+@startuml
+start
+while (x < 10)
+  :A;
+  break;
+endwhile
+:B;
+stop
+@enduml

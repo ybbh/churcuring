@@ -1,0 +1,63 @@
+type TransferSummary {
+  from: AccountId;
+  to: AccountId;
+  amount: int;
+}
+
+context TransferCtx {
+  from: AccountId;
+  to: AccountId;
+  amount: int;
+}
+
+state Check uses TransferCtx {
+  next {
+    when \E Relation Account a
+         by a.id = TransferCtx.from :
+            a.balance >= TransferCtx.amount
+    => Debit {
+      export
+        summary: TransferSummary;
+    }
+
+    otherwise => Reject;
+  }
+}
+
+state Debit uses TransferCtx {
+  use state Check {
+    summary: TransferSummary;
+  }
+
+  update Account
+    set balance = balance - TransferCtx.amount
+    where id = TransferCtx.from;
+
+  next {
+    otherwise => Credit;
+  }
+}
+
+state Credit uses TransferCtx {
+  update Account
+    set balance = balance + TransferCtx.amount
+    where id = TransferCtx.to;
+
+  next {
+    otherwise => Commit;
+  }
+}
+
+state Reject uses TransferCtx {
+  next {
+    otherwise => Reject;
+  }
+}
+
+state Commit uses TransferCtx {
+  commit;
+
+  next {
+    otherwise => Commit;
+  }
+}

@@ -1,0 +1,19 @@
+context OrderCtx {
+  qty: int;
+}
+
+state Validate uses OrderCtx {
+  assert OrderCtx.qty > 0;
+
+  next {
+    otherwise => Done;
+  }
+}
+
+state Done uses OrderCtx {
+  commit;
+
+  next {
+    otherwise => Done;
+  }
+}

@@ -1,0 +1,12 @@
+@startuml
+start
+if (x == 1)
+  :A;
+elseif (x == 2)
+  :B;
+else
+  :C;
+endif
+:D;
+stop
+@enduml

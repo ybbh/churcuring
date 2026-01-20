@@ -1,0 +1,34 @@
+[package]
+name = "tree-sitter-scl"
+description = "State Construction Language (SCL) is a database system language in which correctness is achieved by constructing only valid system states, rather than handling errors during execution."
+version = "0.1.0"
+authors = ["scuptio"]
+license = "Apache"
+readme = "README.md"
+keywords = ["incremental", "parsing", "tree-sitter", "scl"]
+categories = ["parser-implementations", "parsing", "text-editors"]
+repository = "https://github.com/tree-sitter/tree-sitter-scl"
+edition = "2021"
+autoexamples = false
+
+build = "bindings/rust/build.rs"
+include = [
+    "bindings/rust/*",
+    "grammar.js",
+    "queries/*",
+    "src/*",
+    "tree-sitter.json",
+    "/LICENSE",
+]
+
+[lib]
+path = "bindings/rust/lib.rs"
+
+[dependencies]
+tree-sitter-language = "0.1"
+
+[build-dependencies]
+cc = "1.2"
+
+[dev-dependencies]
+tree-sitter = "0.26.3"

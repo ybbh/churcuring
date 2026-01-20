@@ -1,0 +1,27 @@
+context TransferCtx {
+  from: AccountId;
+  amount: int;
+}
+
+state CheckBalance uses TransferCtx {
+  next {
+    when \E Relation Account a
+         by a.id = TransferCtx.from :
+            a.balance >= TransferCtx.amount
+    => Approved;
+
+    otherwise => Rejected;
+  }
+}
+
+state Approved uses TransferCtx {
+  next {
+    otherwise => Approved;
+  }
+}
+
+state Rejected uses TransferCtx {
+  next {
+    otherwise => Rejected;
+  }
+}

@@ -1,0 +1,32 @@
+// Auto-generated FSM transition
+// {{ t.comment }}
+
+namespace GeneratedFSM
+{
+    public static class {{ t.class_name }}
+    {
+
+        {% if t.condition.is_some() %}
+        /// <summary>
+        /// Condition check for transition {{ t.from }} -> {{ t.to }}
+        /// </summary>
+        public static bool CheckCondition(Context ctx)
+        {
+            // TODO: implement condition logic
+            // {{ t.condition.as_ref().unwrap() }}
+            return false;
+        }
+        {% else %}
+        public static bool CheckCondition(Context ctx)
+        {
+            // always true condition
+            return true;
+        }
+        {% endif %}
+
+        public static State Execute(Context ctx)
+        {
+            return State.{{ t.to }};
+        }
+    }
+}
