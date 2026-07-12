@@ -1,0 +1,33 @@
+{
+  "grammars": [
+    {
+      "name": "cql",
+      "camelcase": "CQL",
+      "title": "CQL",
+      "scope": "source.cql",
+      "file-types": [
+        "cql"
+      ],
+      "injection-regex": "^cql$",
+      "class-name": "TreeSitterCql"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT OR Apache-2.0",
+    "description": "tree-sitter grammar for CQL (Churcuring Query Language)",
+    "authors": [],
+    "links": {
+      "repository": "https://example.invalid/churcuring-p"
+    }
+  },
+  "bindings": {
+    "c": false,
+    "go": false,
+    "node": false,
+    "python": false,
+    "rust": true,
+    "swift": false,
+    "zig": false
+  }
+}

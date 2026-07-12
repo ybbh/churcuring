@@ -1,0 +1,248 @@
+==================
+int literals
+==================
+
+module m;
+const a: int == 0;
+const b: int == 1_000;
+const c: int == 0x1F;
+const d: int == 0xDEAD_beef;
+
+---
+
+(source_file
+  name: (ident)
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (int_literal)))
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (int_literal)))
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (int_literal)))
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (int_literal))))
+
+==================
+float literals
+==================
+
+module m;
+const a: float == 1.5;
+const b: float == 1e-3;
+const c: float == 1.5E+2;
+const d: float == 2_000.0e-1;
+
+---
+
+(source_file
+  name: (ident)
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (float_literal)))
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (float_literal)))
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (float_literal)))
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (float_literal))))
+
+==================
+string escapes
+==================
+
+module m;
+const s: string == "hi\n\t\\\" \u{1F600}\u{41}";
+
+---
+
+(source_file
+  name: (ident)
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (string_literal
+        (string_content)
+        (escape_sequence)
+        (escape_sequence)
+        (escape_sequence)
+        (escape_sequence)
+        (escape_sequence)
+        (escape_sequence)))))
+
+==================
+string interpolation
+==================
+
+module m;
+const s: string == "sum: \(a + 1), done";
+
+---
+
+(source_file
+  name: (ident)
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (string_literal
+        (string_content)
+        (interpolation
+          (binary_expression
+            left: (ident)
+            right: (literal
+              (int_literal))))
+        (string_content)))))
+
+==================
+comments
+==================
+
+module m;
+// line comment
+/* block
+   comment */
+const a: int == 1; // trailing
+/* another */ const b: int == 2;
+
+---
+
+(source_file
+  name: (ident)
+  (comment)
+  (comment)
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (int_literal)))
+  (comment)
+  (comment)
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (int_literal))))
+
+==================
+decimal literals
+==================
+
+module m;
+const a: decimal(4, 2) == decimal(4, 2) 3.14;
+const b: decimal == decimal 42;
+const c: decimal(10, 0) == decimal(10, 0) 1_000;
+
+---
+
+(source_file
+  name: (ident)
+  (const_declaration
+    name: (ident)
+    type: (type
+      (decimal_type
+        (int_literal)
+        (int_literal)))
+    value: (literal
+      (decimal_literal
+        (int_literal)
+        (int_literal)
+        value: (float_literal))))
+  (const_declaration
+    name: (ident)
+    type: (type
+      (decimal_type))
+    value: (literal
+      (decimal_literal
+        value: (int_literal))))
+  (const_declaration
+    name: (ident)
+    type: (type
+      (decimal_type
+        (int_literal)
+        (int_literal)))
+    value: (literal
+      (decimal_literal
+        (int_literal)
+        (int_literal)
+        value: (int_literal)))))
+
+==================
+date literal
+==================
+
+module m;
+const d: date == date "2024-01-01";
+
+---
+
+(source_file
+  name: (ident)
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (date_literal
+        value: (string_literal
+          (string_content))))))
+
+==================
+boolean literals
+==================
+
+module m;
+const t: bool == true;
+const f: bool == false;
+
+---
+
+(source_file
+  name: (ident)
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (boolean_literal)))
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (boolean_literal))))
+

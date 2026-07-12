@@ -1,0 +1,8 @@
+[package]
+name = "bank"
+version = "0.1.0"
+
+[build]
+source_root = "src"
+out_dir = "target/cql"
+backend = "rust"

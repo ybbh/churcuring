@@ -1,0 +1,14 @@
+# Verification configuration (doc/model-check.md §6.3)
+[depth]
+default = 32
+
+[domain]
+accounts.rows = 2
+accounts.id = "1..2"
+accounts.balance = [0, 6000, 4000]
+
+[trace]
+length = 8
+
+[fairness]
+weak = []

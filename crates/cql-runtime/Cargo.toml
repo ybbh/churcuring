@@ -1,0 +1,12 @@
+[package]
+name = "cql-runtime"
+version = "0.1.0"
+edition = "2021"
+description = "CQL runtime: value types, Table trait, in-memory tables, write_op application, stdlib"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+rust_decimal = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }

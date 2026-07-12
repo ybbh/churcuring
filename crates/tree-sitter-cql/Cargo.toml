@@ -1,0 +1,18 @@
+[package]
+name = "tree-sitter-cql"
+version = "0.1.0"
+edition = "2021"
+description = "tree-sitter grammar and Rust binding for CQL (Churcuring Query Language)"
+license = "MIT OR Apache-2.0"
+
+[lib]
+path = "bindings/rust/lib.rs"
+
+[dependencies]
+tree-sitter-language = { workspace = true }
+
+[dev-dependencies]
+tree-sitter = { workspace = true }
+
+[build-dependencies]
+cc = { workspace = true }

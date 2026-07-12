@@ -1,0 +1,15 @@
+[package]
+name = "cql-mc"
+version = "0.1.0"
+edition = "2021"
+description = "CQL model checker: checker-neutral IR with Stateright (explicit) and z3.rs (symbolic BMC) backends"
+license = "MIT OR Apache-2.0"
+
+[features]
+default = ["stateright", "z3"]
+stateright = ["dep:stateright"]
+z3 = ["dep:z3"]
+
+[dependencies]
+stateright = { workspace = true, optional = true }
+z3 = { workspace = true, optional = true }

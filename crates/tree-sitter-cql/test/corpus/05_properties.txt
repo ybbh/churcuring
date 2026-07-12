@@ -1,0 +1,228 @@
+==================
+safety properties
+==================
+
+module m;
+property balance_conserved == [](total_balance() = 10000)
+property no_negative == \A a \in accounts : a.balance >= 0
+property transfer_preserves == [](total_balance()' = total_balance())
+
+---
+
+(source_file
+  name: (ident)
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (always_expression
+        operand: (temporal_expression
+          (parenthesized_expression
+            (comparison_expression
+              left: (additive_expression
+                (multiplicative_expression
+                  (call_expression
+                    function: (ident)
+                    arguments: (arguments))))
+              right: (additive_expression
+                (multiplicative_expression
+                  (literal
+                    (int_literal))))))))))
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (quantifier
+        (generator
+          (pattern
+            (ident))
+          collection: (ident))
+        body: (comparison_expression
+          left: (additive_expression
+            (multiplicative_expression
+              (member_expression
+                operand: (ident)
+                member: (ident))))
+          right: (additive_expression
+            (multiplicative_expression
+              (literal
+                (int_literal))))))))
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (always_expression
+        operand: (temporal_expression
+          (parenthesized_expression
+            (comparison_expression
+              left: (additive_expression
+                (multiplicative_expression
+                  (primed_expression
+                    operand: (call_expression
+                      function: (ident)
+                      arguments: (arguments)))))
+              right: (additive_expression
+                (multiplicative_expression
+                  (call_expression
+                    function: (ident)
+                    arguments: (arguments)))))))))))
+
+==================
+liveness leads to
+==================
+
+module m;
+property pending_resolved ==
+    (\E o \in orders : o.status = some_pending) ~> (\A o \in orders : o.status /= some_pending)
+
+---
+
+(source_file
+  name: (ident)
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (leads_to_expression
+        left: (temporal_expression
+          (parenthesized_expression
+            (quantifier
+              (generator
+                (pattern
+                  (ident))
+                collection: (ident))
+              body: (comparison_expression
+                left: (additive_expression
+                  (multiplicative_expression
+                    (member_expression
+                      operand: (ident)
+                      member: (ident))))
+                right: (additive_expression
+                  (multiplicative_expression
+                    (ident)))))))
+        right: (temporal_expression
+          (parenthesized_expression
+            (quantifier
+              (generator
+                (pattern
+                  (ident))
+                collection: (ident))
+              body: (comparison_expression
+                left: (additive_expression
+                  (multiplicative_expression
+                    (member_expression
+                      operand: (ident)
+                      member: (ident))))
+                right: (additive_expression
+                  (multiplicative_expression
+                    (ident)))))))))))
+
+==================
+eventually and until
+==================
+
+module m;
+property settles == <>(settled_count() > 0)
+property holds_until == (queue_empty()) until (shutdown_requested())
+
+---
+
+(source_file
+  name: (ident)
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (eventually_expression
+        operand: (temporal_expression
+          (parenthesized_expression
+            (comparison_expression
+              left: (additive_expression
+                (multiplicative_expression
+                  (call_expression
+                    function: (ident)
+                    arguments: (arguments))))
+              right: (additive_expression
+                (multiplicative_expression
+                  (literal
+                    (int_literal))))))))))
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (until_expression
+        left: (temporal_expression
+          (parenthesized_expression
+            (call_expression
+              function: (ident)
+              arguments: (arguments))))
+        right: (temporal_expression
+          (parenthesized_expression
+            (call_expression
+              function: (ident)
+              arguments: (arguments))))))))
+
+==================
+temporal precedence
+==================
+
+module m;
+property p1 == a ~> b ~> c
+property p2 == a ~> b until c
+property p3 == [](a) ~> <>(b)
+
+---
+
+(source_file
+  name: (ident)
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (leads_to_expression
+        left: (temporal_expression
+          (ident))
+        right: (temporal_expression
+          (leads_to_expression
+            left: (temporal_expression
+              (ident))
+            right: (temporal_expression
+              (ident)))))))
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (until_expression
+        left: (temporal_expression
+          (leads_to_expression
+            left: (temporal_expression
+              (ident))
+            right: (temporal_expression
+              (ident))))
+        right: (temporal_expression
+          (ident)))))
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (leads_to_expression
+        left: (temporal_expression
+          (always_expression
+            operand: (temporal_expression
+              (parenthesized_expression
+                (ident)))))
+        right: (temporal_expression
+          (eventually_expression
+            operand: (temporal_expression
+              (parenthesized_expression
+                (ident)))))))))
+
+==================
+fairness
+==================
+
+module m;
+fairness weak == transfer, settle
+fairness strong == retry
+
+---
+
+(source_file
+  name: (ident)
+  (fairness_declaration
+    (ident)
+    (ident))
+  (fairness_declaration
+    (ident)))
+

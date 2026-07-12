@@ -1,0 +1,121 @@
+# Build Guide
+
+This document covers everything needed to build and test all components in this repository.
+The local environment is **Windows + Git Bash** with **no network access**, so all cargo
+commands carry `--offline`; verified toolchain: rustc/cargo 1.94.0-nightly, tree-sitter
+CLI 0.26.10.
+
+## 1. Prerequisites
+
+| Tool | Version requirement | Purpose |
+| --- | --- | --- |
+| Rust nightly + cargo | 1.94.0-nightly (local `0e8999942 2025-12-30`) | Build all Rust crates (required) |
+| tree-sitter CLI | 0.26.x (`npm install -g tree-sitter-cli`) | Grammar development: `tree-sitter generate/test/highlight` (only needed when changing the grammar) |
+| Node.js + npm + tsc | TypeScript ^5.3 | VSCode plugin build (optional) |
+| emscripten (or Docker) | — | `tree-sitter build --wasm` wasm build of the grammar bundle (optional, **not available locally**, see §4) |
+
+## 2. Rust workspace build & test
+
+```sh
+# Full workspace build (cqlc artifact at ./target/debug/cqlc)
+cargo build --workspace --offline
+
+# Build a single crate
+cargo build -p cql-cli --offline
+cargo build -p cql-compiler --offline
+cargo build -p cql-runtime --offline
+
+# Full test suite (~289 tests)
+cargo test --workspace --offline
+
+# Test a single crate
+cargo test -p cql-mc --offline
+```
+
+### 2.1 Offline / air-gapped notes
+
+- All builds use `--offline`; dependencies are pre-populated in the cargo cache and in
+  this repository's `Cargo.lock`.
+- **z3 and the gh-release rate-limit issue**: `z3 0.20`'s `gh-release` feature downloads
+  prebuilt Z3 4.16 via the GitHub API at build time; when access is restricted or
+  rate-limited (403), the build script panics. For this reason, **the workspace does not
+  enable z3 for cql-compiler / cql-cli by default**: both depend on cql-mc with
+  `default-features = false, features = ["stateright"]`, and `cqlc verify` exposes only
+  the Stateright backend.
+- If you really need the z3 backend (`cargo build -p cql-mc --features z3 --offline`) and
+  the network is restricted, a known workaround (cache-copy workaround):
+  1. Find the cache from a previous successful build: `target/debug/build/z3-sys-<oldhash>/out/z3-4.16.0`;
+  2. Copy it into the new hash directory: `target/debug/build/z3-sys-<newhash>/out/z3-4.16.0`;
+  3. Rebuild — the build script will recognize the cache and skip the download.
+  Alternatively, set the environment variable `Z3_LIBRARY_PATH_OVERRIDE` pointing at a
+  local `libz3.lib` (see `doc/model-check.md` §7.3).
+
+### 2.2 Building generated code (the output of cqlc build)
+
+`cqlc build` writes a **standalone cargo crate** into the project's `out_dir` (default
+`target/cql`):
+
+- its `Cargo.toml` depends on `crates/cql-runtime` by **absolute path** and carries an
+  empty `[workspace]` section (to avoid being absorbed by the outer workspace);
+- `cqlc build` then automatically runs `cargo build --offline` in that directory;
+  `cqlc test` runs `cargo test --offline`.
+- The artifacts can be removed with `cqlc clean <path>`.
+
+## 3. tree-sitter grammar (crates/tree-sitter-cql)
+
+```sh
+cd crates/tree-sitter-cql
+tree-sitter generate    # generates src/parser.c etc. from grammar.js
+tree-sitter test        # corpus tests, currently 43/43 passing
+tree-sitter highlight --check <file.cql>   # validate queries/highlights.scm (if a theme is configured)
+```
+
+The corpus lives in `test/corpus/*.txt` (01_lexical through 05_properties). After changing
+grammar.js you **must re-run `tree-sitter generate`**, otherwise the Rust binding still
+compiles the old parser.c.
+
+## 4. VSCode plugin (editors/vscode-cql)
+
+```sh
+cd editors/vscode-cql
+npm install --no-audit --no-fund   # typescript, @types/vscode, web-tree-sitter, etc.
+npm run compile                    # equivalent to npx tsc -p ./
+```
+
+Debugging: open the `editors/vscode-cql` directory in VSCode and press **F5** (config in
+`.vscode/launch.json`, launches the Extension Development Host), then open any
+`examples/**/*.cql` to see highlighting.
+
+**wasm grammar bundle (currently pending)**: the plugin expects a `tree-sitter-cql.wasm`
+in its root directory; this machine has no emscripten/Docker, so the artifact **has not
+been built and is not checked in**, and the plugin degrades gracefully without the wasm
+(only basic editor features; semantic tokens are not enabled). Build steps (pending an
+emscripten environment):
+
+```sh
+cd crates/tree-sitter-cql
+tree-sitter build --wasm            # produces tree-sitter-cql.wasm
+cp tree-sitter-cql.wasm ../../editors/vscode-cql/
+```
+
+The wasm must be rebuilt whenever `grammar.js` changes.
+
+## 5. Known platform issues (gotchas)
+
+- **Windows UAC false block**: test binaries whose filename contains "update" are refused
+  by Windows with error 740 (elevation required). Convention: avoid "update" in test
+  binary/target names; `cqlc` also rewrites `update` in a package name to `upd` when
+  generating a crate (see `cargo_pkg_name` in `crates/cql-cli/src/project.rs`).
+- **nightly rustc false-positive `unused_assignments`**: code generated by the `miette`
+  derive macros triggers nightly's `unused_assignments` false positive on `diag::CqlError`
+  fields; it is handled by a module-level `#[allow(unused_assignments)]` in
+  `crates/cql-compiler/src/lib.rs` — do not remove it.
+- **z3 gh-release 403**: see §2.1.
+
+## 6. Common combinations (day-to-day development loop)
+
+```sh
+cargo test --workspace --offline        # Rust tests all green
+cd crates/tree-sitter-cql && tree-sitter test   # grammar corpus
+./target/debug/cqlc check examples/shop_project # example project smoke test
+```

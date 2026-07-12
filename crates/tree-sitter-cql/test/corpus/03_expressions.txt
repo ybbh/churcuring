@@ -1,0 +1,904 @@
+==================
+precedence levels
+==================
+
+module m;
+query q() -> bool == {
+    a \/ b /\ c = d + e * f \cup g \cap h \X i \ j - k / l % m => ~n \/ -o
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (binary_expression
+        left: (binary_expression
+          left: (ident)
+          right: (binary_expression
+            left: (ident)
+            right: (comparison_expression
+              left: (additive_expression
+                (multiplicative_expression
+                  (ident)))
+              right: (additive_expression
+                left: (additive_expression
+                  left: (additive_expression
+                    left: (additive_expression
+                      left: (additive_expression
+                        (multiplicative_expression
+                          (ident)))
+                      right: (multiplicative_expression
+                        left: (multiplicative_expression
+                          (ident))
+                        right: (ident)))
+                    right: (multiplicative_expression
+                      left: (multiplicative_expression
+                        left: (multiplicative_expression
+                          (ident))
+                        right: (ident))
+                      right: (ident)))
+                  right: (multiplicative_expression
+                    (ident)))
+                right: (multiplicative_expression
+                  left: (multiplicative_expression
+                    left: (multiplicative_expression
+                      (ident))
+                    right: (ident))
+                  right: (ident))))))
+        right: (binary_expression
+          left: (unary_expression
+            operand: (ident))
+          right: (unary_expression
+            operand: (ident)))))))
+
+==================
+right associative implies
+==================
+
+module m;
+query q() -> bool == { a => b => c }
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (binary_expression
+        left: (ident)
+        right: (binary_expression
+          left: (ident)
+          right: (ident))))))
+
+==================
+comparison not chainable
+==================
+
+module m;
+// `a = b = c` is a hard syntax error by design (comparison operands are
+// additive expressions); tree-sitter reports an ERROR node here.
+query q() -> bool == { a = b = c }
+
+---
+
+(source_file
+  name: (ident)
+  (comment)
+  (comment)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (comparison_expression
+        left: (additive_expression
+          (multiplicative_expression
+            (ident)))
+        right: (additive_expression
+          (multiplicative_expression
+            (ident))))
+      (ERROR
+        (ident)))))
+
+==================
+postfix and cast
+==================
+
+module m;
+query q() -> int == {
+    let t == (1, 2, 3);
+    let x == t.0 + r.field.method(1).other;
+    let y == (x as float) + (1 as int);
+    let z == opt?;
+    f(x)(y) as int
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      (let_binding
+        (pattern
+          (ident))
+        value: (tuple_literal
+          (literal
+            (int_literal))
+          (literal
+            (int_literal))
+          (literal
+            (int_literal))))
+      (let_binding
+        (pattern
+          (ident))
+        value: (binary_expression
+          left: (member_expression
+            operand: (ident)
+            member: (int_literal))
+          right: (member_expression
+            operand: (call_expression
+              function: (member_expression
+                operand: (member_expression
+                  operand: (ident)
+                  member: (ident))
+                member: (ident))
+              arguments: (arguments
+                (argument
+                  value: (literal
+                    (int_literal)))))
+            member: (ident))))
+      (let_binding
+        (pattern
+          (ident))
+        value: (binary_expression
+          left: (parenthesized_expression
+            (cast_expression
+              operand: (ident)
+              type: (type
+                (primitive_type))))
+          right: (parenthesized_expression
+            (cast_expression
+              operand: (literal
+                (int_literal))
+              type: (type
+                (primitive_type))))))
+      (let_binding
+        (pattern
+          (ident))
+        value: (try_expression
+          operand: (ident)))
+      body: (cast_expression
+        operand: (call_expression
+          function: (call_expression
+            function: (ident)
+            arguments: (arguments
+              (argument
+                value: (ident))))
+          arguments: (arguments
+            (argument
+              value: (ident))))
+        type: (type
+          (primitive_type))))))
+
+==================
+turbofish call
+==================
+
+module m;
+query q() -> int == { f::<int>(x) + g::<int, string>(y) }
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (binary_expression
+        left: (call_expression
+          function: (ident)
+          type_arguments: (type_arguments
+            (type
+              (primitive_type)))
+          arguments: (arguments
+            (argument
+              value: (ident))))
+        right: (call_expression
+          function: (ident)
+          type_arguments: (type_arguments
+            (type
+              (primitive_type))
+            (type
+              (primitive_type)))
+          arguments: (arguments
+            (argument
+              value: (ident))))))))
+
+==================
+named arguments
+==================
+
+module m;
+query q() -> int == {
+    aggregate(pairs,
+              group_key: lambda(r) { r.city },
+              value: lambda(r) { (r.duration as float, 1) },
+              init: (0.0, 0),
+              reducer: lambda((a, c), (b, d)) { (a + b, c + d) })
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (call_expression
+        function: (ident)
+        arguments: (arguments
+          (argument
+            value: (ident))
+          (argument
+            name: (ident)
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (ident)))
+              body: (block
+                body: (member_expression
+                  operand: (ident)
+                  member: (ident)))))
+          (argument
+            name: (ident)
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (ident)))
+              body: (block
+                body: (tuple_literal
+                  (cast_expression
+                    operand: (member_expression
+                      operand: (ident)
+                      member: (ident))
+                    type: (type
+                      (primitive_type)))
+                  (literal
+                    (int_literal))))))
+          (argument
+            name: (ident)
+            value: (tuple_literal
+              (literal
+                (float_literal))
+              (literal
+                (int_literal))))
+          (argument
+            name: (ident)
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (tuple_pattern
+                    (pattern
+                      (ident))
+                    (pattern
+                      (ident)))))
+              (lambda_parameter
+                (pattern
+                  (tuple_pattern
+                    (pattern
+                      (ident))
+                    (pattern
+                      (ident)))))
+              body: (block
+                body: (tuple_literal
+                  (binary_expression
+                    left: (ident)
+                    right: (ident))
+                  (binary_expression
+                    left: (ident)
+                    right: (ident)))))))))))
+
+==================
+set filter form
+==================
+
+module m;
+query q() -> set<int> == { set { x \in users if x.active /\ x.age >= 18 } }
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (set_type
+        element: (type
+          (primitive_type))))
+    body: (block
+      body: (set_form
+        (filter_form
+          (pattern
+            (ident))
+          collection: (ident)
+          predicate: (binary_expression
+            left: (member_expression
+              operand: (ident)
+              member: (ident))
+            right: (comparison_expression
+              left: (additive_expression
+                (multiplicative_expression
+                  (member_expression
+                    operand: (ident)
+                    member: (ident))))
+              right: (additive_expression
+                (multiplicative_expression
+                  (literal
+                    (int_literal)))))))))))
+
+==================
+set map form multi generator
+==================
+
+module m;
+query q() -> set<int> == {
+    set { x + y : x \in xs, y \in ys }
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (set_type
+        element: (type
+          (primitive_type))))
+    body: (block
+      body: (set_form
+        (map_form
+          key: (binary_expression
+            left: (ident)
+            right: (ident))
+          (generator
+            (pattern
+              (ident))
+            collection: (ident))
+          (generator
+            (pattern
+              (ident))
+            collection: (ident)))))))
+
+==================
+option generator
+==================
+
+module m;
+query q() -> set<int> == { set { u.id : u \in lookup(users, o.user_id) } }
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (set_type
+        element: (type
+          (primitive_type))))
+    body: (block
+      body: (set_form
+        (map_form
+          key: (member_expression
+            operand: (ident)
+            member: (ident))
+          (generator
+            (pattern
+              (ident))
+            collection: (call_expression
+              function: (ident)
+              arguments: (arguments
+                (argument
+                  value: (ident))
+                (argument
+                  value: (member_expression
+                    operand: (ident)
+                    member: (ident)))))))))))
+
+==================
+bag and map literals
+==================
+
+module m;
+query q() -> bag<int> == { bag { o.amount : o \in orders } }
+query r() -> map<int, string> == { map { 1: "a", 2: "b" } }
+query s() -> map<int, string> == { map {} }
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (bag_type
+        element: (type
+          (primitive_type))))
+    body: (block
+      body: (bag_form
+        (map_form
+          key: (member_expression
+            operand: (ident)
+            member: (ident))
+          (generator
+            (pattern
+              (ident))
+            collection: (ident))))))
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (map_type
+        key: (type
+          (primitive_type))
+        value: (type
+          (primitive_type))))
+    body: (block
+      body: (map_literal
+        (map_entry
+          key: (literal
+            (int_literal))
+          value: (literal
+            (string_literal
+              (string_content))))
+        (map_entry
+          key: (literal
+            (int_literal))
+          value: (literal
+            (string_literal
+              (string_content)))))))
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (map_type
+        key: (type
+          (primitive_type))
+        value: (type
+          (primitive_type))))
+    body: (block
+      body: (map_literal))))
+
+==================
+quantifier
+==================
+
+module m;
+query q() -> bool == { \A x \in S, y \in T : x + y >= 0 }
+query r() -> bool == { \E o \in orders : o.status = some_pending }
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (quantifier
+        (generator
+          (pattern
+            (ident))
+          collection: (ident))
+        (generator
+          (pattern
+            (ident))
+          collection: (ident))
+        body: (comparison_expression
+          left: (additive_expression
+            left: (additive_expression
+              (multiplicative_expression
+                (ident)))
+            right: (multiplicative_expression
+              (ident)))
+          right: (additive_expression
+            (multiplicative_expression
+              (literal
+                (int_literal))))))))
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (quantifier
+        (generator
+          (pattern
+            (ident))
+          collection: (ident))
+        body: (comparison_expression
+          left: (additive_expression
+            (multiplicative_expression
+              (member_expression
+                operand: (ident)
+                member: (ident))))
+          right: (additive_expression
+            (multiplicative_expression
+              (ident))))))))
+
+==================
+lambda forms
+==================
+
+module m;
+query q() -> int == {
+    let f1 == lambda [new_city](v) { record { v with city: new_city } };
+    let f2 == lambda(_) { 42 };
+    let f3 == lambda(x: int, y: int) -> int { x + y };
+    let f4 == lambda []() { 0 };
+    let f5 == lambda((a, b)) { a + b };
+    f3(1, 2)
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      (let_binding
+        (pattern
+          (ident))
+        value: (lambda
+          (capture_list
+            (ident))
+          (lambda_parameter
+            (pattern
+              (ident)))
+          body: (block
+            body: (record_update
+              base: (ident)
+              (record_field
+                name: (ident)
+                value: (ident))))))
+      (let_binding
+        (pattern
+          (ident))
+        value: (lambda
+          (lambda_parameter
+            (pattern
+              (wildcard_pattern)))
+          body: (block
+            body: (literal
+              (int_literal)))))
+      (let_binding
+        (pattern
+          (ident))
+        value: (lambda
+          (lambda_parameter
+            (pattern
+              (ident))
+            type: (type
+              (primitive_type)))
+          (lambda_parameter
+            (pattern
+              (ident))
+            type: (type
+              (primitive_type)))
+          return_type: (type
+            (primitive_type))
+          body: (block
+            body: (binary_expression
+              left: (ident)
+              right: (ident)))))
+      (let_binding
+        (pattern
+          (ident))
+        value: (lambda
+          (capture_list)
+          body: (block
+            body: (literal
+              (int_literal)))))
+      (let_binding
+        (pattern
+          (ident))
+        value: (lambda
+          (lambda_parameter
+            (pattern
+              (tuple_pattern
+                (pattern
+                  (ident))
+                (pattern
+                  (ident)))))
+          body: (block
+            body: (binary_expression
+              left: (ident)
+              right: (ident)))))
+      body: (call_expression
+        function: (ident)
+        arguments: (arguments
+          (argument
+            value: (literal
+              (int_literal)))
+          (argument
+            value: (literal
+              (int_literal))))))))
+
+==================
+match patterns
+==================
+
+module m;
+query pats(v: result) -> int == {
+    match v {
+        none => 0,
+        some(x) => x,
+        ok(v) => v,
+        1 => 10,
+        "s" => 11,
+        true => 12,
+        (a, b) => a,
+        (a, b, c) => a,
+        {x, y} => x,
+        [] => 13,
+        [h, .. t] => h,
+        _ => 99,
+    }
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (named_type
+            name: (ident)))))
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (match_expression
+        scrutinee: (ident)
+        (match_arm
+          (pattern
+            (option_pattern))
+          body: (literal
+            (int_literal)))
+        (match_arm
+          (pattern
+            (option_pattern
+              (pattern
+                (ident))))
+          body: (ident))
+        (match_arm
+          (pattern
+            (variant_pattern
+              name: (ident)
+              (pattern
+                (ident))))
+          body: (ident))
+        (match_arm
+          (pattern
+            (int_literal))
+          body: (literal
+            (int_literal)))
+        (match_arm
+          (pattern
+            (string_literal
+              (string_content)))
+          body: (literal
+            (int_literal)))
+        (match_arm
+          (pattern
+            (boolean_literal))
+          body: (literal
+            (int_literal)))
+        (match_arm
+          (pattern
+            (tuple_pattern
+              (pattern
+                (ident))
+              (pattern
+                (ident))))
+          body: (ident))
+        (match_arm
+          (pattern
+            (tuple_pattern
+              (pattern
+                (ident))
+              (pattern
+                (ident))
+              (pattern
+                (ident))))
+          body: (ident))
+        (match_arm
+          (pattern
+            (record_pattern
+              (ident)
+              (ident)))
+          body: (ident))
+        (match_arm
+          (pattern
+            (vector_pattern))
+          body: (literal
+            (int_literal)))
+        (match_arm
+          (pattern
+            (vector_pattern
+              (pattern
+                (ident))
+              (pattern
+                (ident))))
+          body: (ident))
+        (match_arm
+          (pattern
+            (wildcard_pattern))
+          body: (literal
+            (int_literal)))))))
+
+==================
+record literal and update
+==================
+
+module m;
+query q() -> int == {
+    let r == record { id: 1, name: "a" };
+    let r2 == record { r with name: "b", city: "c" };
+    r.id
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      (let_binding
+        (pattern
+          (ident))
+        value: (record_literal
+          (record_field
+            name: (ident)
+            value: (literal
+              (int_literal)))
+          (record_field
+            name: (ident)
+            value: (literal
+              (string_literal
+                (string_content))))))
+      (let_binding
+        (pattern
+          (ident))
+        value: (record_update
+          base: (ident)
+          (record_field
+            name: (ident)
+            value: (literal
+              (string_literal
+                (string_content))))
+          (record_field
+            name: (ident)
+            value: (literal
+              (string_literal
+                (string_content))))))
+      body: (member_expression
+        operand: (ident)
+        member: (ident)))))
+
+==================
+block and let
+==================
+
+module m;
+query q() -> int == {
+    let x == 1;
+    let y: int == x + 1;
+    let (a, b) == (y, x);
+    a + b
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      (let_binding
+        (pattern
+          (ident))
+        value: (literal
+          (int_literal)))
+      (let_binding
+        (pattern
+          (ident))
+        type: (type
+          (primitive_type))
+        value: (binary_expression
+          left: (ident)
+          right: (literal
+            (int_literal))))
+      (let_binding
+        (pattern
+          (tuple_pattern
+            (pattern
+              (ident))
+            (pattern
+              (ident))))
+        value: (tuple_literal
+          (ident)
+          (ident)))
+      body: (binary_expression
+        left: (ident)
+        right: (ident)))))
+
+==================
+if and vector
+==================
+
+module m;
+query q() -> vector<int> == { if a then [1, 2] else [] }
+query r() -> int == { 1 + if a then b else c * 2 }
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (vector_type
+        element: (type
+          (primitive_type))))
+    body: (block
+      body: (if_expression
+        condition: (ident)
+        consequence: (vector_literal
+          (literal
+            (int_literal))
+          (literal
+            (int_literal)))
+        alternative: (vector_literal))))
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (binary_expression
+        left: (literal
+          (int_literal))
+        right: (if_expression
+          condition: (ident)
+          consequence: (ident)
+          alternative: (binary_expression
+            left: (ident)
+            right: (literal
+              (int_literal))))))))
+

@@ -1,0 +1,537 @@
+==================
+use declarations
+==================
+
+module m;
+use std::collections;
+use a::b::c as d;
+
+---
+
+(source_file
+  name: (ident)
+  (use_declaration
+    (ident)
+    (ident))
+  (use_declaration
+    (ident)
+    (ident)
+    (ident)
+    alias: (ident)))
+
+==================
+schema tables
+==================
+
+module analytics;
+
+table users { id: int, name: string, active: bool, city: string } primary key {id}
+table orders { order_id: int, user_id: int, amount: float }
+    primary key {order_id}
+    foreign key {user_id} references users
+table sessions { session_id: int, user_id: int, duration: int }
+    primary key {session_id}
+    foreign key {user_id} references users
+index sessions_by_user on sessions(user_id)
+
+---
+
+(source_file
+  name: (ident)
+  (table_declaration
+    name: (ident)
+    schema: (record_type
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    (primary_key_clause
+      (ident)))
+  (table_declaration
+    name: (ident)
+    schema: (record_type
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    (primary_key_clause
+      (ident))
+    (foreign_key_clause
+      (ident)
+      target: (ident)))
+  (table_declaration
+    name: (ident)
+    schema: (record_type
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    (primary_key_clause
+      (ident))
+    (foreign_key_clause
+      (ident)
+      target: (ident)))
+  (index_declaration
+    name: (ident)
+    table: (ident)
+    (ident)))
+
+==================
+const declarations
+==================
+
+module m;
+const timeout: int == 30;
+public const pi: float == 3.14
+
+---
+
+(source_file
+  name: (ident)
+  (const_declaration
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (int_literal)))
+  (const_declaration
+    (visibility)
+    name: (ident)
+    type: (type
+      (primitive_type))
+    value: (literal
+      (float_literal))))
+
+==================
+type declarations
+==================
+
+module m;
+type user_id == int;
+type pair<A, B> == (A, B);
+type int_map == map<int, vector<string>>;
+type handler == (int, string) -> bool;
+type row == { id: int, name: string };
+public type boxed<T> == option<T>;
+
+---
+
+(source_file
+  name: (ident)
+  (type_declaration
+    name: (ident)
+    definition: (type
+      (primitive_type)))
+  (type_declaration
+    name: (ident)
+    type_parameters: (type_parameters
+      (ident)
+      (ident))
+    definition: (type
+      (tuple_type
+        (type
+          (named_type
+            name: (ident)))
+        (type
+          (named_type
+            name: (ident))))))
+  (type_declaration
+    name: (ident)
+    definition: (type
+      (map_type
+        key: (type
+          (primitive_type))
+        value: (type
+          (vector_type
+            element: (type
+              (primitive_type)))))))
+  (type_declaration
+    name: (ident)
+    definition: (type
+      (function_type
+        parameter: (type
+          (tuple_type
+            (type
+              (primitive_type))
+            (type
+              (primitive_type))))
+        return_type: (type
+          (primitive_type)))))
+  (type_declaration
+    name: (ident)
+    definition: (type
+      (record_type
+        (field_declaration
+          name: (ident)
+          type: (type
+            (primitive_type)))
+        (field_declaration
+          name: (ident)
+          type: (type
+            (primitive_type))))))
+  (type_declaration
+    (visibility)
+    name: (ident)
+    type_parameters: (type_parameters
+      (ident))
+    definition: (type
+      (option_type
+        element: (type
+          (named_type
+            name: (ident)))))))
+
+==================
+enum declarations
+==================
+
+module m;
+enum tree { leaf(int), node(tree, int, tree) }
+enum result<T, E> { ok(T), err(E) }
+enum shape { circle { radius: float }, rect(float, float), point }
+
+---
+
+(source_file
+  name: (ident)
+  (enum_declaration
+    name: (ident)
+    (variant
+      name: (ident)
+      (type
+        (primitive_type)))
+    (variant
+      name: (ident)
+      (type
+        (named_type
+          name: (ident)))
+      (type
+        (primitive_type))
+      (type
+        (named_type
+          name: (ident)))))
+  (enum_declaration
+    name: (ident)
+    type_parameters: (type_parameters
+      (ident)
+      (ident))
+    (variant
+      name: (ident)
+      (type
+        (named_type
+          name: (ident))))
+    (variant
+      name: (ident)
+      (type
+        (named_type
+          name: (ident)))))
+  (enum_declaration
+    name: (ident)
+    (variant
+      name: (ident)
+      payload: (record_type
+        (field_declaration
+          name: (ident)
+          type: (type
+            (primitive_type)))))
+    (variant
+      name: (ident)
+      (type
+        (primitive_type))
+      (type
+        (primitive_type)))
+    (variant
+      name: (ident))))
+
+==================
+function declarations
+==================
+
+module m;
+function pure_is_long_session(dur: int) -> bool == { dur > 300 }
+function recursive inorder(t: tree) -> vector<int> == { [0] }
+function gcd(a: int, b: int) -> int == { if b = 0 then a else gcd(b, a % b) }
+function f<T>(x: T) -> option<T> == { some(x) }
+function g() -> int -> int;
+function recursive h(n: int) -> int decreases n with depth 32 == { n }
+public function id(x: int) -> int == { x }
+
+---
+
+(source_file
+  name: (ident)
+  (function_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (comparison_expression
+        left: (additive_expression
+          (multiplicative_expression
+            (ident)))
+        right: (additive_expression
+          (multiplicative_expression
+            (literal
+              (int_literal)))))))
+  (function_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (named_type
+            name: (ident)))))
+    return_type: (type
+      (vector_type
+        element: (type
+          (primitive_type))))
+    body: (block
+      body: (vector_literal
+        (literal
+          (int_literal)))))
+  (function_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (call_expression
+        function: (if_expression
+          condition: (comparison_expression
+            left: (additive_expression
+              (multiplicative_expression
+                (ident)))
+            right: (additive_expression
+              (multiplicative_expression
+                (literal
+                  (int_literal)))))
+          consequence: (ident)
+          alternative: (ident))
+        arguments: (arguments
+          (argument
+            value: (ident))
+          (argument
+            value: (binary_expression
+              left: (ident)
+              right: (ident)))))))
+  (function_declaration
+    name: (ident)
+    type_parameters: (type_parameters
+      (ident))
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (named_type
+            name: (ident)))))
+    return_type: (type
+      (option_type
+        element: (type
+          (named_type
+            name: (ident)))))
+    body: (block
+      body: (option_literal
+        value: (ident))))
+  (function_declaration
+    name: (ident)
+    return_type: (type
+      (function_type
+        parameter: (type
+          (primitive_type))
+        return_type: (type
+          (primitive_type)))))
+  (function_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    return_type: (type
+      (primitive_type))
+    (decreases_clause
+      measure: (ident))
+    (depth_clause
+      bound: (int_literal))
+    body: (block
+      body: (ident)))
+  (function_declaration
+    (visibility)
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (ident))))
+
+==================
+query and action
+==================
+
+module m;
+query active_users() -> set<{ id: int }> == { set {} }
+query recursive subordinates(mgr_id: int) -> set<int> with depth 32 == { set {} }
+action remove_inactive_users() -> set<write_op> == { set {} }
+public action noop() -> set<write_op> == { set {} }
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (set_type
+        element: (type
+          (record_type
+            (field_declaration
+              name: (ident)
+              type: (type
+                (primitive_type)))))))
+    body: (block
+      body: (set_form)))
+  (query_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    return_type: (type
+      (set_type
+        element: (type
+          (primitive_type))))
+    (depth_clause
+      bound: (int_literal))
+    body: (block
+      body: (set_form)))
+  (action_declaration
+    name: (ident)
+    body: (block
+      body: (set_form)))
+  (action_declaration
+    (visibility)
+    name: (ident)
+    body: (block
+      body: (set_form))))
+
+==================
+invariant and test
+==================
+
+module m;
+invariant positive_balance on accounts == \A a \in accounts : a.balance >= 0;
+test counterexample_balance {
+    fixture accounts == [
+        record { id: 1, owner: "a", balance: 6000 },
+        record { id: 2, owner: "b", balance: 4000 }
+    ];
+    expect total_balance() == 10000;
+}
+
+---
+
+(source_file
+  name: (ident)
+  (invariant_declaration
+    name: (ident)
+    table: (ident)
+    condition: (quantifier
+      (generator
+        (pattern
+          (ident))
+        collection: (ident))
+      body: (comparison_expression
+        left: (additive_expression
+          (multiplicative_expression
+            (member_expression
+              operand: (ident)
+              member: (ident))))
+        right: (additive_expression
+          (multiplicative_expression
+            (literal
+              (int_literal)))))))
+  (test_declaration
+    name: (ident)
+    (fixture_statement
+      name: (ident)
+      value: (vector_literal
+        (record_literal
+          (record_field
+            name: (ident)
+            value: (literal
+              (int_literal)))
+          (record_field
+            name: (ident)
+            value: (literal
+              (string_literal
+                (string_content))))
+          (record_field
+            name: (ident)
+            value: (literal
+              (int_literal))))
+        (record_literal
+          (record_field
+            name: (ident)
+            value: (literal
+              (int_literal)))
+          (record_field
+            name: (ident)
+            value: (literal
+              (string_literal
+                (string_content))))
+          (record_field
+            name: (ident)
+            value: (literal
+              (int_literal))))))
+    (expect_statement
+      actual: (call_expression
+        function: (ident)
+        arguments: (arguments))
+      expected: (literal
+        (int_literal)))))
+

@@ -1,0 +1,963 @@
+==================
+avg session by city
+==================
+
+module analytics;
+
+query avg_session_by_city() -> vector<{ key: string, agg: float }> == {
+    let pairs == set { record { city: u.city, session_id: s.session_id, duration: s.duration }
+                       : u \in set { x \in users if x.active },
+                         s \in read(sessions, lambda [u](y) { y.user_id = u.id /\ pure_is_long_session(y.duration) }) };
+    aggregate(pairs,
+              group_key: lambda(r) { r.city },
+              value: lambda(r) { (r.duration as float, 1) },
+              reducer: lambda((a, c), (b, d)) { (a + b, c + d) },
+              init: (0.0, 0),
+              finalize: lambda((total, count)) { total / (count as float) })
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (vector_type
+        element: (type
+          (record_type
+            (field_declaration
+              name: (ident)
+              type: (type
+                (primitive_type)))
+            (field_declaration
+              name: (ident)
+              type: (type
+                (primitive_type)))))))
+    body: (block
+      (let_binding
+        (pattern
+          (ident))
+        value: (set_form
+          (map_form
+            key: (record_literal
+              (record_field
+                name: (ident)
+                value: (member_expression
+                  operand: (ident)
+                  member: (ident)))
+              (record_field
+                name: (ident)
+                value: (member_expression
+                  operand: (ident)
+                  member: (ident)))
+              (record_field
+                name: (ident)
+                value: (member_expression
+                  operand: (ident)
+                  member: (ident))))
+            (generator
+              (pattern
+                (ident))
+              collection: (set_form
+                (filter_form
+                  (pattern
+                    (ident))
+                  collection: (ident)
+                  predicate: (member_expression
+                    operand: (ident)
+                    member: (ident)))))
+            (generator
+              (pattern
+                (ident))
+              collection: (call_expression
+                function: (ident)
+                arguments: (arguments
+                  (argument
+                    value: (ident))
+                  (argument
+                    value: (lambda
+                      (capture_list
+                        (ident))
+                      (lambda_parameter
+                        (pattern
+                          (ident)))
+                      body: (block
+                        body: (binary_expression
+                          left: (comparison_expression
+                            left: (additive_expression
+                              (multiplicative_expression
+                                (member_expression
+                                  operand: (ident)
+                                  member: (ident))))
+                            right: (additive_expression
+                              (multiplicative_expression
+                                (member_expression
+                                  operand: (ident)
+                                  member: (ident)))))
+                          right: (call_expression
+                            function: (ident)
+                            arguments: (arguments
+                              (argument
+                                value: (member_expression
+                                  operand: (ident)
+                                  member: (ident)))))))))))))))
+      body: (call_expression
+        function: (ident)
+        arguments: (arguments
+          (argument
+            value: (ident))
+          (argument
+            name: (ident)
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (ident)))
+              body: (block
+                body: (member_expression
+                  operand: (ident)
+                  member: (ident)))))
+          (argument
+            name: (ident)
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (ident)))
+              body: (block
+                body: (tuple_literal
+                  (cast_expression
+                    operand: (member_expression
+                      operand: (ident)
+                      member: (ident))
+                    type: (type
+                      (primitive_type)))
+                  (literal
+                    (int_literal))))))
+          (argument
+            name: (ident)
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (tuple_pattern
+                    (pattern
+                      (ident))
+                    (pattern
+                      (ident)))))
+              (lambda_parameter
+                (pattern
+                  (tuple_pattern
+                    (pattern
+                      (ident))
+                    (pattern
+                      (ident)))))
+              body: (block
+                body: (tuple_literal
+                  (binary_expression
+                    left: (ident)
+                    right: (ident))
+                  (binary_expression
+                    left: (ident)
+                    right: (ident))))))
+          (argument
+            name: (ident)
+            value: (tuple_literal
+              (literal
+                (float_literal))
+              (literal
+                (int_literal))))
+          (argument
+            name: (ident)
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (tuple_pattern
+                    (pattern
+                      (ident))
+                    (pattern
+                      (ident)))))
+              body: (block
+                body: (binary_expression
+                  left: (ident)
+                  right: (parenthesized_expression
+                    (cast_expression
+                      operand: (ident)
+                      type: (type
+                        (primitive_type)))))))))))))
+
+==================
+remove inactive users
+==================
+
+module m;
+action remove_inactive_users() -> set<write_op> == {
+    set { delete(users, u.id) : u \in set { v \in users if ~v.active } }
+}
+
+---
+
+(source_file
+  name: (ident)
+  (action_declaration
+    name: (ident)
+    body: (block
+      body: (set_form
+        (map_form
+          key: (call_expression
+            function: (ident)
+            arguments: (arguments
+              (argument
+                value: (ident))
+              (argument
+                value: (member_expression
+                  operand: (ident)
+                  member: (ident)))))
+          (generator
+            (pattern
+              (ident))
+            collection: (set_form
+              (filter_form
+                (pattern
+                  (ident))
+                collection: (ident)
+                predicate: (unary_expression
+                  operand: (member_expression
+                    operand: (ident)
+                    member: (ident)))))))))))
+
+==================
+order report
+==================
+
+module m;
+query order_report(min_amount: float) -> vector<{ order_id: int, who: string }> == {
+    take(sort_by(to_vector(set { record { order_id: o.order_id,
+                                      who: lookup(users, o.user_id).map(lambda(u) { u.name }).unwrap_or("<deleted>") }
+                              : o \in set { x \in orders if x.amount >= min_amount } }),
+                 lambda(r) { r.order_id }),
+         5)
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    return_type: (type
+      (vector_type
+        element: (type
+          (record_type
+            (field_declaration
+              name: (ident)
+              type: (type
+                (primitive_type)))
+            (field_declaration
+              name: (ident)
+              type: (type
+                (primitive_type)))))))
+    body: (block
+      body: (call_expression
+        function: (ident)
+        arguments: (arguments
+          (argument
+            value: (call_expression
+              function: (ident)
+              arguments: (arguments
+                (argument
+                  value: (call_expression
+                    function: (ident)
+                    arguments: (arguments
+                      (argument
+                        value: (set_form
+                          (map_form
+                            key: (record_literal
+                              (record_field
+                                name: (ident)
+                                value: (member_expression
+                                  operand: (ident)
+                                  member: (ident)))
+                              (record_field
+                                name: (ident)
+                                value: (call_expression
+                                  function: (member_expression
+                                    operand: (call_expression
+                                      function: (member_expression
+                                        operand: (call_expression
+                                          function: (ident)
+                                          arguments: (arguments
+                                            (argument
+                                              value: (ident))
+                                            (argument
+                                              value: (member_expression
+                                                operand: (ident)
+                                                member: (ident)))))
+                                        member: (ident))
+                                      arguments: (arguments
+                                        (argument
+                                          value: (lambda
+                                            (lambda_parameter
+                                              (pattern
+                                                (ident)))
+                                            body: (block
+                                              body: (member_expression
+                                                operand: (ident)
+                                                member: (ident)))))))
+                                    member: (ident))
+                                  arguments: (arguments
+                                    (argument
+                                      value: (literal
+                                        (string_literal
+                                          (string_content))))))))
+                            (generator
+                              (pattern
+                                (ident))
+                              collection: (set_form
+                                (filter_form
+                                  (pattern
+                                    (ident))
+                                  collection: (ident)
+                                  predicate: (comparison_expression
+                                    left: (additive_expression
+                                      (multiplicative_expression
+                                        (member_expression
+                                          operand: (ident)
+                                          member: (ident))))
+                                    right: (additive_expression
+                                      (multiplicative_expression
+                                        (ident)))))))))))))
+                (argument
+                  value: (lambda
+                    (lambda_parameter
+                      (pattern
+                        (ident)))
+                    body: (block
+                      body: (member_expression
+                        operand: (ident)
+                        member: (ident))))))))
+          (argument
+            value: (literal
+              (int_literal))))))))
+
+==================
+quantifier and bag
+==================
+
+module m;
+query active_users_all_named() -> bool == { \A u \in set { v \in users if v.active } : u.name /= "" }
+query amount_histogram() -> vector<{ key: int, agg: int }> == {
+    count_by(bag { o.amount : o \in orders }, lambda(a) { floor(a) as int })
+}
+query total_amount_by_user() -> vector<{ key: int, agg: float }> == {
+    sum_by(read(orders, lambda(o) { true }), lambda(o) { o.user_id }, lambda(o) { o.amount })
+}
+
+---
+
+(source_file
+  name: (ident)
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (quantifier
+        (generator
+          (pattern
+            (ident))
+          collection: (set_form
+            (filter_form
+              (pattern
+                (ident))
+              collection: (ident)
+              predicate: (member_expression
+                operand: (ident)
+                member: (ident)))))
+        body: (comparison_expression
+          left: (additive_expression
+            (multiplicative_expression
+              (member_expression
+                operand: (ident)
+                member: (ident))))
+          right: (additive_expression
+            (multiplicative_expression
+              (literal
+                (string_literal))))))))
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (vector_type
+        element: (type
+          (record_type
+            (field_declaration
+              name: (ident)
+              type: (type
+                (primitive_type)))
+            (field_declaration
+              name: (ident)
+              type: (type
+                (primitive_type)))))))
+    body: (block
+      body: (call_expression
+        function: (ident)
+        arguments: (arguments
+          (argument
+            value: (bag_form
+              (map_form
+                key: (member_expression
+                  operand: (ident)
+                  member: (ident))
+                (generator
+                  (pattern
+                    (ident))
+                  collection: (ident)))))
+          (argument
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (ident)))
+              body: (block
+                body: (cast_expression
+                  operand: (call_expression
+                    function: (ident)
+                    arguments: (arguments
+                      (argument
+                        value: (ident))))
+                  type: (type
+                    (primitive_type))))))))))
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (vector_type
+        element: (type
+          (record_type
+            (field_declaration
+              name: (ident)
+              type: (type
+                (primitive_type)))
+            (field_declaration
+              name: (ident)
+              type: (type
+                (primitive_type)))))))
+    body: (block
+      body: (call_expression
+        function: (ident)
+        arguments: (arguments
+          (argument
+            value: (call_expression
+              function: (ident)
+              arguments: (arguments
+                (argument
+                  value: (ident))
+                (argument
+                  value: (lambda
+                    (lambda_parameter
+                      (pattern
+                        (ident)))
+                    body: (block
+                      body: (literal
+                        (boolean_literal))))))))
+          (argument
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (ident)))
+              body: (block
+                body: (member_expression
+                  operand: (ident)
+                  member: (ident)))))
+          (argument
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (ident)))
+              body: (block
+                body: (member_expression
+                  operand: (ident)
+                  member: (ident))))))))))
+
+==================
+recursion
+==================
+
+module m;
+enum tree { leaf(int), node(tree, int, tree) }
+function recursive inorder(t: tree) -> vector<int> == {
+    match t {
+        leaf(v)       => [v],
+        node(l, x, r) => concat_vector(concat_vector(inorder(l), [x]), inorder(r))
+    }
+}
+function gcd(a: int, b: int) -> int == { if b = 0 then a else gcd(b, a % b) }
+table employees { id: int, name: string, manager_id: option<int> } primary key {id}
+query subordinates(mgr_id: int) -> set<int> with depth 32 == {
+    let direct == set { e.id : e \in set { x \in employees if x.manager_id = some(mgr_id) } };
+    direct \cup union_all(set { subordinates(d) : d \in direct })
+}
+
+---
+
+(source_file
+  name: (ident)
+  (enum_declaration
+    name: (ident)
+    (variant
+      name: (ident)
+      (type
+        (primitive_type)))
+    (variant
+      name: (ident)
+      (type
+        (named_type
+          name: (ident)))
+      (type
+        (primitive_type))
+      (type
+        (named_type
+          name: (ident)))))
+  (function_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (named_type
+            name: (ident)))))
+    return_type: (type
+      (vector_type
+        element: (type
+          (primitive_type))))
+    body: (block
+      body: (match_expression
+        scrutinee: (ident)
+        (match_arm
+          (pattern
+            (variant_pattern
+              name: (ident)
+              (pattern
+                (ident))))
+          body: (vector_literal
+            (ident)))
+        (match_arm
+          (pattern
+            (variant_pattern
+              name: (ident)
+              (pattern
+                (ident))
+              (pattern
+                (ident))
+              (pattern
+                (ident))))
+          body: (call_expression
+            function: (ident)
+            arguments: (arguments
+              (argument
+                value: (call_expression
+                  function: (ident)
+                  arguments: (arguments
+                    (argument
+                      value: (call_expression
+                        function: (ident)
+                        arguments: (arguments
+                          (argument
+                            value: (ident)))))
+                    (argument
+                      value: (vector_literal
+                        (ident))))))
+              (argument
+                value: (call_expression
+                  function: (ident)
+                  arguments: (arguments
+                    (argument
+                      value: (ident)))))))))))
+  (function_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (call_expression
+        function: (if_expression
+          condition: (comparison_expression
+            left: (additive_expression
+              (multiplicative_expression
+                (ident)))
+            right: (additive_expression
+              (multiplicative_expression
+                (literal
+                  (int_literal)))))
+          consequence: (ident)
+          alternative: (ident))
+        arguments: (arguments
+          (argument
+            value: (ident))
+          (argument
+            value: (binary_expression
+              left: (ident)
+              right: (ident)))))))
+  (table_declaration
+    name: (ident)
+    schema: (record_type
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (option_type
+            element: (type
+              (primitive_type))))))
+    (primary_key_clause
+      (ident)))
+  (query_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    return_type: (type
+      (set_type
+        element: (type
+          (primitive_type))))
+    (depth_clause
+      bound: (int_literal))
+    body: (block
+      (let_binding
+        (pattern
+          (ident))
+        value: (set_form
+          (map_form
+            key: (member_expression
+              operand: (ident)
+              member: (ident))
+            (generator
+              (pattern
+                (ident))
+              collection: (set_form
+                (filter_form
+                  (pattern
+                    (ident))
+                  collection: (ident)
+                  predicate: (comparison_expression
+                    left: (additive_expression
+                      (multiplicative_expression
+                        (member_expression
+                          operand: (ident)
+                          member: (ident))))
+                    right: (additive_expression
+                      (multiplicative_expression
+                        (option_literal
+                          value: (ident)))))))))))
+      body: (binary_expression
+        left: (ident)
+        right: (call_expression
+          function: (ident)
+          arguments: (arguments
+            (argument
+              value: (set_form
+                (map_form
+                  key: (call_expression
+                    function: (ident)
+                    arguments: (arguments
+                      (argument
+                        value: (ident))))
+                  (generator
+                    (pattern
+                      (ident))
+                    collection: (ident)))))))))))
+
+==================
+transfer action
+==================
+
+module m;
+table accounts { id: int, owner: string, balance: int } primary key {id}
+action transfer(from_id: int, to_id: int, amt: int) -> set<write_op> == {
+    match (lookup(accounts, from_id), lookup(accounts, to_id)) {
+        (some(f), some(t)) =>
+            if f.balance >= amt then
+                set { update(accounts, from_id, lambda [amt](v) { record { v with balance: v.balance - amt } }),
+                      update(accounts, to_id,   lambda [amt](v) { record { v with balance: v.balance + amt } }) }
+            else set {},
+        _ => set {}
+    }
+}
+query total_balance() -> int == {
+    fold(to_vector(accounts), 0, lambda(acc, a) { acc + a.balance })
+}
+property balance_conserved == [](total_balance() = 10000)
+property no_negative       == \A a \in accounts : a.balance >= 0
+property transfer_preserves == [](total_balance()' = total_balance())
+property pending_resolved ==
+    (\E o \in orders : o.status = some_pending) ~> (\A o \in orders : o.status /= some_pending)
+fairness weak == transfer, settle
+
+---
+
+(source_file
+  name: (ident)
+  (table_declaration
+    name: (ident)
+    schema: (record_type
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (field_declaration
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    (primary_key_clause
+      (ident)))
+  (action_declaration
+    name: (ident)
+    (parameters
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type)))
+      (parameter
+        name: (ident)
+        type: (type
+          (primitive_type))))
+    body: (block
+      body: (match_expression
+        scrutinee: (tuple_literal
+          (call_expression
+            function: (ident)
+            arguments: (arguments
+              (argument
+                value: (ident))
+              (argument
+                value: (ident))))
+          (call_expression
+            function: (ident)
+            arguments: (arguments
+              (argument
+                value: (ident))
+              (argument
+                value: (ident)))))
+        (match_arm
+          (pattern
+            (tuple_pattern
+              (pattern
+                (option_pattern
+                  (pattern
+                    (ident))))
+              (pattern
+                (option_pattern
+                  (pattern
+                    (ident))))))
+          body: (if_expression
+            condition: (comparison_expression
+              left: (additive_expression
+                (multiplicative_expression
+                  (member_expression
+                    operand: (ident)
+                    member: (ident))))
+              right: (additive_expression
+                (multiplicative_expression
+                  (ident))))
+            consequence: (set_form
+              (call_expression
+                function: (ident)
+                arguments: (arguments
+                  (argument
+                    value: (ident))
+                  (argument
+                    value: (ident))
+                  (argument
+                    value: (lambda
+                      (capture_list
+                        (ident))
+                      (lambda_parameter
+                        (pattern
+                          (ident)))
+                      body: (block
+                        body: (record_update
+                          base: (ident)
+                          (record_field
+                            name: (ident)
+                            value: (binary_expression
+                              left: (member_expression
+                                operand: (ident)
+                                member: (ident))
+                              right: (ident)))))))))
+              (call_expression
+                function: (ident)
+                arguments: (arguments
+                  (argument
+                    value: (ident))
+                  (argument
+                    value: (ident))
+                  (argument
+                    value: (lambda
+                      (capture_list
+                        (ident))
+                      (lambda_parameter
+                        (pattern
+                          (ident)))
+                      body: (block
+                        body: (record_update
+                          base: (ident)
+                          (record_field
+                            name: (ident)
+                            value: (binary_expression
+                              left: (member_expression
+                                operand: (ident)
+                                member: (ident))
+                              right: (ident))))))))))
+            alternative: (set_form)))
+        (match_arm
+          (pattern
+            (wildcard_pattern))
+          body: (set_form)))))
+  (query_declaration
+    name: (ident)
+    return_type: (type
+      (primitive_type))
+    body: (block
+      body: (call_expression
+        function: (ident)
+        arguments: (arguments
+          (argument
+            value: (call_expression
+              function: (ident)
+              arguments: (arguments
+                (argument
+                  value: (ident)))))
+          (argument
+            value: (literal
+              (int_literal)))
+          (argument
+            value: (lambda
+              (lambda_parameter
+                (pattern
+                  (ident)))
+              (lambda_parameter
+                (pattern
+                  (ident)))
+              body: (block
+                body: (binary_expression
+                  left: (ident)
+                  right: (member_expression
+                    operand: (ident)
+                    member: (ident))))))))))
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (always_expression
+        operand: (temporal_expression
+          (parenthesized_expression
+            (comparison_expression
+              left: (additive_expression
+                (multiplicative_expression
+                  (call_expression
+                    function: (ident)
+                    arguments: (arguments))))
+              right: (additive_expression
+                (multiplicative_expression
+                  (literal
+                    (int_literal))))))))))
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (quantifier
+        (generator
+          (pattern
+            (ident))
+          collection: (ident))
+        body: (comparison_expression
+          left: (additive_expression
+            (multiplicative_expression
+              (member_expression
+                operand: (ident)
+                member: (ident))))
+          right: (additive_expression
+            (multiplicative_expression
+              (literal
+                (int_literal))))))))
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (always_expression
+        operand: (temporal_expression
+          (parenthesized_expression
+            (comparison_expression
+              left: (additive_expression
+                (multiplicative_expression
+                  (primed_expression
+                    operand: (call_expression
+                      function: (ident)
+                      arguments: (arguments)))))
+              right: (additive_expression
+                (multiplicative_expression
+                  (call_expression
+                    function: (ident)
+                    arguments: (arguments))))))))))
+  (property_declaration
+    name: (ident)
+    body: (temporal_expression
+      (leads_to_expression
+        left: (temporal_expression
+          (parenthesized_expression
+            (quantifier
+              (generator
+                (pattern
+                  (ident))
+                collection: (ident))
+              body: (comparison_expression
+                left: (additive_expression
+                  (multiplicative_expression
+                    (member_expression
+                      operand: (ident)
+                      member: (ident))))
+                right: (additive_expression
+                  (multiplicative_expression
+                    (ident)))))))
+        right: (temporal_expression
+          (parenthesized_expression
+            (quantifier
+              (generator
+                (pattern
+                  (ident))
+                collection: (ident))
+              body: (comparison_expression
+                left: (additive_expression
+                  (multiplicative_expression
+                    (member_expression
+                      operand: (ident)
+                      member: (ident))))
+                right: (additive_expression
+                  (multiplicative_expression
+                    (ident))))))))))
+  (fairness_declaration
+    (ident)
+    (ident)))
+

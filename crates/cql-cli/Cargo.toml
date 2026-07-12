@@ -1,0 +1,19 @@
+[package]
+name = "cql-cli"
+version = "0.1.0"
+edition = "2021"
+description = "cqlc: CQL compiler CLI (new/check/build/test/verify/clean)"
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "cqlc"
+path = "src/main.rs"
+
+[dependencies]
+cql-compiler = { path = "../cql-compiler" }
+cql-runtime = { path = "../cql-runtime" }
+cql-mc = { path = "../cql-mc", default-features = false, features = ["stateright"] }
+clap = { workspace = true }
+miette = { workspace = true }
+serde = { workspace = true }
+toml = { workspace = true }
